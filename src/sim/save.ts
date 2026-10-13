@@ -35,11 +35,30 @@ export function deserialize(save: SaveFile, wasm: ConstructorParameters<typeof N
   const world: World = { ...rest, entities: new Map(entities.map((e) => [e.id, e])), terrain: fromB64(terrain) };
   const nav = new Nav(world.W, world.H, wasm);
   for (let i = 0; i < world.terrain.length; i++) nav.setBase(i, world.terrain[i] === 3 ? 255 : world.terrain[i] === 2 ? 6 : 0);
+  blockAll(nav, world);
+  return new Sim(world, nav);
+}
+
+function blockAll(nav: Nav, world: World) {
   for (const e of world.entities.values()) {
     if (e.kind === 'building' && e.tx != null) nav.block(e.tx, e.ty!, e.w!, e.h!, true);
     else if ((e.kind === 'resource' || e.kind === 'prop') && content.props[e.def]?.blocks) nav.block(Math.floor(e.x), Math.floor(e.y), 1, 1, true);
   }
-  return new Sim(world, nav);
+}
+
+/**
+ * Replace the state of a running Sim in place (same map). The World object identity is kept so
+ * renderers keep working — used by network resync, which must not freeze the client.
+ */
+export function applySave(sim: Sim, save: SaveFile): boolean {
+  const { entities, terrain, ...rest } = structuredClone(save.world);
+  if (rest.W !== sim.world.W || rest.H !== sim.world.H || rest.settings.mapId !== sim.world.settings.mapId) return false;
+  content.applyOverrides(save.overrides ?? {});
+  Object.assign(sim.world, rest, { entities: new Map(entities.map((e) => [e.id, e])), terrain: fromB64(terrain) });
+  sim.rng.state = sim.world.rng;
+  sim.nav.clearBlockers();
+  blockAll(sim.nav, sim.world);
+  return true;
 }
 
 function toB64(a: Uint8Array) {

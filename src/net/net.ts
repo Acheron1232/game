@@ -6,7 +6,7 @@
  */
 import { content } from '../engine/registry';
 import type { Game } from '../game';
-import type { SaveFile } from '../sim/save';
+import { applySave, type SaveFile } from '../sim/save';
 import type { Command } from '../sim/types';
 
 export function relayUrl() {
@@ -116,7 +116,7 @@ export class HostSession {
   hook(game: Game) {
     this.game = game;
     game.sim.onStep = (tick, cmds) => {
-      const msg: any = { t: 'tick', tick, cmds };
+      const msg: any = { t: 'tick', tick, cmds, sp: game.sim.speed };
       if (tick % 40 === 0) msg.sum = game.sim.checksum();
       this.link.send({ type: 'broadcast', data: msg });
     };
@@ -139,8 +139,11 @@ export class HostSession {
 export class GuestSession {
   private pending: any[] = [];
   private game: Game | null = null;
-  private lastTickAt = 0;
   private resyncing = false;
+  /** playback clock in ticks (fractional part drives interpolation) */
+  private acc = 0;
+  private speed = 1;
+  readonly stats = { buffer: 0, desyncs: 0, resyncs: 0, late: 0, lastMsgAt: 0, jitter: 0 };
   onStart: ((save: SaveFile, faction: number) => void) | null = null;
   faction = 0;
 
@@ -168,12 +171,21 @@ export class GuestSession {
       this.pending = [];
       this.resyncing = false;
       this.faction = d.faction;
+      this.acc = 0;
       if (this.game) {
-        this.game.load(d.save, d.faction);
-        this.attach(this.game);
+        // resync in place: keep the 3D scene, swap the simulation state (no freeze)
+        if (!applySave(this.game.sim, d.save)) {
+          this.game.load(d.save, d.faction);
+          this.attach(this.game);
+        }
+        this.stats.resyncs++;
       } else this.onStart?.(d.save, d.faction);
-    } else if (d.t === 'tick') this.pending.push(d);
-    else if (d.t === 'patch') content.patch(d.path, d.value);
+    } else if (d.t === 'tick') {
+      const now = performance.now();
+      if (this.stats.lastMsgAt) this.stats.jitter = this.stats.jitter * 0.9 + Math.abs(now - this.stats.lastMsgAt - 1000 / (content.balance.tickRate * this.speed)) * 0.1;
+      this.stats.lastMsgAt = now;
+      this.pending.push(d);
+    } else if (d.t === 'patch') content.patch(d.path, d.value);
   }
 
   /** Puts the local game into remote-driven mode. */
@@ -182,29 +194,44 @@ export class GuestSession {
     const sim = game.sim;
     sim.remote = true;
     sim.sendHook = (cmd) => this.link.send({ type: 'to-host', data: { t: 'cmd', cmd } });
-    game.beforeFrame = () => this.pump();
+    game.beforeFrame = (dt) => this.pump(dt);
   }
 
-  private pump() {
-    const game = this.game!;
-    const sim = game.sim;
-    let n = 0;
-    while (this.pending.length && n < 60) {
-      const m = this.pending[0];
-      if (m.tick <= sim.world.tick) { this.pending.shift(); continue; }
-      if (m.tick !== sim.world.tick + 1) { this.requestResync(); this.pending.shift(); continue; }
-      this.pending.shift();
+  /**
+   * Jitter buffer: ticks are played back at the host's rate with ~3 ticks of delay, so bursty
+   * delivery over Wi-Fi/Internet does not cause stepping. The rate adapts smoothly to keep the
+   * buffer near its target; a large backlog is caught up over several frames.
+   */
+  private pump(dt: number) {
+    const sim = this.game!.sim;
+    // drop stale messages, detect gaps
+    while (this.pending.length && this.pending[0].tick <= sim.world.tick) this.pending.shift();
+    if (this.pending.length && this.pending[0].tick !== sim.world.tick + 1) { this.requestResync(); this.pending = []; }
+    const buf = this.pending.length;
+    this.stats.buffer = buf;
+    const target = 3;
+    if (buf) this.speed = this.pending[buf - 1].sp ?? this.speed;
+    let rate = 1;
+    if (buf > target + 8) rate = 2.5;
+    else if (buf > target + 2) rate = 1.25;
+    else if (buf < target - 1) rate = 0.85;
+    this.acc += dt * content.balance.tickRate * this.speed * rate;
+    let steps = 0;
+    while (this.acc >= 1 && this.pending.length && steps < 12) {
+      const m = this.pending.shift();
       for (const c of m.cmds) sim.applyRemote(c);
       sim.step();
-      n++;
-      this.lastTickAt = performance.now();
+      this.acc -= 1;
+      steps++;
       if (m.sum != null && m.sum !== sim.checksum()) {
+        this.stats.desyncs++;
         console.warn('[net] desync at tick', m.tick);
         this.requestResync();
         break;
       }
     }
-    sim.remoteAlpha = Math.min(1, (performance.now() - this.lastTickAt) / (1000 / content.balance.tickRate));
+    if (!this.pending.length && this.acc > 1) { this.acc = 1; this.stats.late++; } // starved: hold at the latest tick
+    sim.remoteAlpha = Math.min(1, this.acc);
   }
 
   private requestResync() {

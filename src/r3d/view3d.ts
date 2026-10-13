@@ -714,11 +714,13 @@ export class View3D {
         let b = this.buildings.get(e.id);
         if (!b) { b = new BuildingV(e, this); this.buildings.set(e.id, b); }
         seen.add(e.id);
+        b.e = e;
         b.update(dt);
       } else if (e.kind === 'projectile') {
         let p = this.projs.get(e.id);
         if (!p) { p = new ProjV(e, this); this.projs.set(e.id, p); }
         seen.add(e.id);
+        p.e = e;
         p.update(dt, alpha);
       } else if (e.kind === 'resource' && (w.tick % 10 === 0)) {
         // berries + stone scale

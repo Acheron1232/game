@@ -451,7 +451,9 @@ export class Hud {
     this.drawMinimap();
     if (this.perfOn) {
       const s = sim.systems.map((x) => `${x.name.padEnd(10)} ${x.ms.toFixed(2)}ms`).join('\n');
-      set('perf', `FPS ${g.fps.toFixed(0)}  frame ${g.frameMs.toFixed(2)}ms\nrenderer ${g.app.name}  nav ${sim.nav.backend} (${sim.nav.stats.searches} paths)\nentities ${w.entities.size}  views ${g.view.stats.views} (${g.view.stats.visible} visible)\nparticles ${g.view.fx.count}\n${s}`);
+      const net = (window as any).net;
+      const ns = net?.stats ? `\nnet buffer ${net.stats.buffer}  jitter ${net.stats.jitter.toFixed(0)}ms  desync ${net.stats.desyncs}  resync ${net.stats.resyncs}  starved ${net.stats.late}` : net ? `\nnet host · guests ${net.guests.size}` : '';
+      set('perf', `FPS ${g.fps.toFixed(0)}  frame ${g.frameMs.toFixed(2)}ms\nrenderer ${g.app.name}  nav ${sim.nav.backend} (${sim.nav.stats.searches} paths)\nentities ${w.entities.size}  views ${g.view.stats.views} (${g.view.stats.visible} visible)\nparticles ${g.view.fx.count}${ns}\n${s}`);
     }
   }
 

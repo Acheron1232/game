@@ -52,6 +52,12 @@ export class Nav {
     this.refresh(i);
   }
 
+  /** Remove all dynamic blockers (used when the world state is replaced in place). */
+  clearBlockers() {
+    this.blockers.fill(0);
+    for (let i = 0; i < this.grid.length; i++) this.refresh(i);
+  }
+
   private refresh(i: number) {
     this.grid[i] = this.blockers[i] > 0 ? 255 : this.base[i];
   }

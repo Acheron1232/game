@@ -114,7 +114,7 @@ export class Sim {
         console.error('[cmd]', c, e);
       }
     }
-    if (this.onStep) this.onStep(w.tick, q.filter((x) => x.ext).map((x) => x.cmd));
+    const ext = this.onStep ? q.filter((x) => x.ext).map((x) => x.cmd) : null;
     if (this.log.length > 5000) this.log.splice(0, this.log.length - 5000);
     for (const s of this.systems) {
       if (!s.enabled) continue;
@@ -127,6 +127,8 @@ export class Sim {
       s.ms = s.ms * 0.95 + (performance.now() - t0) * 0.05;
     }
     this.cleanup();
+    // after the full tick, so checksums compare identical points of the simulation
+    if (this.onStep && ext) this.onStep(w.tick, ext);
   }
 
   /** Player command (external: replicated over the network). */
