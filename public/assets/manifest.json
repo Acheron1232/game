@@ -1,0 +1,228 @@
+{
+ "version": 1791912870862,
+ "units": {},
+ "buildings": {},
+ "props": {
+  "ic_wood": {
+   "file": "ic_wood.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": -14.5,
+     "y": -25.5,
+     "size": 28.142494558940577
+    }
+   ]
+  },
+  "ic_stone": {
+   "file": "ic_stone.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": []
+  },
+  "ic_food": {
+   "file": "ic_food.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": -14.7,
+     "y": -35.2,
+     "size": 34.98571136907181
+    }
+   ]
+  },
+  "ic_house": {
+   "file": "ic_house.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": []
+  },
+  "ic_swords": {
+   "file": "ic_swords.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": 13.6,
+     "y": -23.7,
+     "size": 13.416407864998739
+    },
+    {
+     "kind": "fire",
+     "x": -14.1,
+     "y": -25,
+     "size": 8.485281374238571
+    }
+   ]
+  },
+  "ic_shield": {
+   "file": "ic_shield.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": -10.7,
+     "y": -41.5,
+     "size": 36
+    }
+   ]
+  },
+  "ic_hammer": {
+   "file": "ic_hammer.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": 6.7,
+     "y": -50.3,
+     "size": 12
+    }
+   ]
+  },
+  "ic_skull": {
+   "file": "ic_skull.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": []
+  },
+  "ic_wheat": {
+   "file": "ic_wheat.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": -3,
+     "y": -35.9,
+     "size": 46.47580015448901
+    }
+   ]
+  },
+  "ic_axe": {
+   "file": "ic_axe.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": []
+  },
+  "ic_pick": {
+   "file": "ic_pick.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": []
+  },
+  "ic_crown": {
+   "file": "ic_crown.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": -5.5,
+     "y": -24.2,
+     "size": 40.24922359499622
+    }
+   ]
+  },
+  "ic_heart": {
+   "file": "ic_heart.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": -18.2,
+     "y": -50.8,
+     "size": 10.392304845413264
+    }
+   ]
+  },
+  "ic_star": {
+   "file": "ic_star.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": -3.2,
+     "y": -32.7,
+     "size": 36.49657518178932
+    }
+   ]
+  },
+  "ic_horn": {
+   "file": "ic_horn.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": 8.7,
+     "y": -45.8,
+     "size": 22.44994432064365
+    }
+   ]
+  },
+  "ic_banner": {
+   "file": "ic_banner.png",
+   "team": null,
+   "w": 64,
+   "h": 64,
+   "lights": [
+    {
+     "kind": "fire",
+     "x": -2.9,
+     "y": -36.4,
+     "size": 34.98571136907181
+    }
+   ]
+  }
+ },
+ "textures": {
+  "tex_grass": {
+   "file": "tex_grass.png",
+   "size": 512
+  },
+  "tex_dirt": {
+   "file": "tex_dirt.png",
+   "size": 512
+  },
+  "tex_cursed": {
+   "file": "tex_cursed.png",
+   "size": 512
+  },
+  "tex_water": {
+   "file": "tex_water.png",
+   "size": 512
+  },
+  "tex_forest": {
+   "file": "tex_forest.png",
+   "size": 512
+  },
+  "tex_sand": {
+   "file": "tex_sand.png",
+   "size": 512
+  }
+ }
+}
